@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "ES6",
+    "target": "ES5",
+    // "rootDir": "./",
+    "moduleResolution": "node",
+    // "allowJs": true,
+    // "checkJs": true,
+    // "declaration": true,
+    // "sourceMap": true,
+
+    "removeComments": true,
+
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    // "strict": true,
+    // "strictFunctionTypes": true,
+    // "strictPropertyInitialization": true,
+    // "alwaysStrict": true,
+
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}
