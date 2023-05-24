@@ -5,14 +5,14 @@ export const HEIGHT = 400;
 
 export const WATER_DENSITY = 0.15;
 export const WATER_PARTICLE_MASS = 200;
-export const WATER_K_FACTOR = 2000;
+export const WATER_K_FACTOR = 20000;
 export const WATER_COLOR = "#0000ff";
-export const WATER_VISCOSITY = 0;
+export const WATER_VISCOSITY = 50;
 
 export const KERNEL_DISTANCE = 8;
 export const TIMESTEP = 0.013;
-export const GRAVITY = glm.vec2.fromValues(0, -5);
-export const RESTITUTION = 0.1;
+export const GRAVITY = glm.vec2.fromValues(0, -10);
+export const RESTITUTION = 0.5;
 
 export function poly6Kernel(r: glm.vec2, h: number) {
   let d = glm.vec2.len(r);

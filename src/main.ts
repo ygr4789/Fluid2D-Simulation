@@ -90,7 +90,6 @@ function computeAcceleration() {
   let acc_v_ = glm.vec2.create();
   particles.forEach((p) => {
     glm.vec2.copy(p.acc, GRAVITY);
-    // glm.vec2.zero(p.acc);
     glm.vec2.zero(acc_pressure);
     glm.vec2.zero(acc_viscosity);
     getNearNeighbors(p.pos, KERNEL_DISTANCE).forEach((p_) => {
@@ -101,10 +100,10 @@ function computeAcceleration() {
 
       glm.vec2.sub(acc_v_, p.vel, p_.vel);
       glm.vec2.scale(acc_v_, acc_v_, (p_.mass / p_.density) * poly6Lap(r, KERNEL_DISTANCE));
-      glm.vec2.add(acc_viscosity, acc_viscosity, acc_p_);
+      glm.vec2.add(acc_viscosity, acc_viscosity, acc_v_);
     });
-    glm.vec2.sub(p.acc, p.acc, acc_pressure);
-    glm.vec2.scaleAndAdd(p.acc, p.acc, acc_viscosity, WATER_VISCOSITY);
+    glm.vec2.scaleAndAdd(p.acc, p.acc, acc_pressure, -1 / p.density);
+    glm.vec2.scaleAndAdd(p.acc, p.acc, acc_viscosity, -WATER_VISCOSITY);
   });
 }
 function updateParcitles(dt: number) {
