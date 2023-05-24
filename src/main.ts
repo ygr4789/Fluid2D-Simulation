@@ -3,7 +3,22 @@ import * as glm from "gl-matrix";
 /** @type {HTMLCanvasElement} */
 
 import "../style/style.css";
-import { GRAVITY, HEIGHT, RESTITUTION, TIMESTEP, WATER_COLOR, WATER_DENSITY, WIDTH } from "./consts";
+import {
+  HEIGHT,
+  WIDTH,
+  GRAVITY,
+  KERNEL_DISTANCE,
+  RESTITUTION,
+  TIMESTEP,
+  WATER_COLOR,
+  WATER_DENSITY,
+  WATER_K_FACTOR,
+  WATER_PARTICLE_MASS,
+  WATER_VISCOSITY,
+  poly6Grad,
+  poly6Kernel,
+  poly6Lap,
+} from "./consts";
 import { Particle } from "./particle";
 
 let particles: Array<Particle> = [];
@@ -19,7 +34,7 @@ function sizeCanvas() {
 function drawParticle(ctx: CanvasRenderingContext2D, p: Particle) {
   ctx.fillStyle = WATER_COLOR;
   ctx.beginPath();
-  ctx.arc(p.pos[0], HEIGHT - p.pos[1], 5, 0, 2 * Math.PI);
+  ctx.arc(p.pos[0], HEIGHT - p.pos[1], 2, 0, 2 * Math.PI);
   // ctx.stroke();
   ctx.fill();
 }
@@ -27,7 +42,9 @@ function drawParticle(ctx: CanvasRenderingContext2D, p: Particle) {
 function initParticles(size: number) {
   for (let x = size / 2; x < 100; x += size) {
     for (let y = size / 2; y < 300; y += size) {
-      particles.push(new Particle(x, y, WATER_DENSITY * size ** 2));
+      particles.push(
+        new Particle(x + (Math.random() * size) / 10, y + (Math.random() * size) / 10, WATER_PARTICLE_MASS)
+      );
     }
   }
 }
@@ -45,16 +62,49 @@ function render() {
 function getNearNeighbors(loc: glm.vec2, dist: number) {
   let ret: Array<Particle> = [];
   particles.forEach((p_) => {
-    if (glm.vec2.dist(loc, p_.pos) < dist) particles.push(p_);
+    if (glm.vec2.dist(loc, p_.pos) < dist) ret.push(p_);
   });
   return ret;
 }
 
-function computeDensity() {}
-function computePressure() {}
+function computeDensity() {
+  let r = glm.vec2.create();
+  particles.forEach((p) => {
+    p.density = 0;
+    getNearNeighbors(p.pos, KERNEL_DISTANCE).forEach((p_) => {
+      glm.vec2.sub(r, p.pos, p_.pos);
+      p.density += p_.mass * poly6Kernel(r, KERNEL_DISTANCE);
+    });
+  });
+}
+function computePressure() {
+  particles.forEach((p) => {
+    p.pressure = WATER_K_FACTOR * (p.density - WATER_DENSITY);
+  });
+}
 function computeAcceleration() {
+  let r = glm.vec2.create();
+  let acc_pressure = glm.vec2.create();
+  let acc_viscosity = glm.vec2.create();
+  let acc_p_ = glm.vec2.create();
+  let acc_v_ = glm.vec2.create();
   particles.forEach((p) => {
     glm.vec2.copy(p.acc, GRAVITY);
+    // glm.vec2.zero(p.acc);
+    glm.vec2.zero(acc_pressure);
+    glm.vec2.zero(acc_viscosity);
+    getNearNeighbors(p.pos, KERNEL_DISTANCE).forEach((p_) => {
+      glm.vec2.sub(r, p.pos, p_.pos);
+      acc_p_ = poly6Grad(r, KERNEL_DISTANCE);
+      glm.vec2.scale(acc_p_, acc_p_, ((p_.mass / p_.density) * (p.pressure + p_.pressure)) / 2);
+      glm.vec2.add(acc_pressure, acc_pressure, acc_p_);
+
+      glm.vec2.sub(acc_v_, p.vel, p_.vel);
+      glm.vec2.scale(acc_v_, acc_v_, (p_.mass / p_.density) * poly6Lap(r, KERNEL_DISTANCE));
+      glm.vec2.add(acc_viscosity, acc_viscosity, acc_p_);
+    });
+    glm.vec2.sub(p.acc, p.acc, acc_pressure);
+    glm.vec2.scaleAndAdd(p.acc, p.acc, acc_viscosity, WATER_VISCOSITY);
   });
 }
 function updateParcitles(dt: number) {
@@ -92,11 +142,11 @@ function simulate() {
 }
 
 // Main animation loop
-function animationLoop() {
+function animate() {
   simulate();
   render();
   // Schedule the next frame
-  window.requestAnimationFrame(animationLoop);
+  window.requestAnimationFrame(animate);
 }
 
 window.onload = () => {
@@ -105,8 +155,8 @@ window.onload = () => {
   sizeCanvas();
 
   // Initialize
-  initParticles(10);
+  initParticles(KERNEL_DISTANCE);
 
   // Schedule the main animation loop
-  window.requestAnimationFrame(animationLoop);
+  animate();
 };
