@@ -18,11 +18,13 @@ import {
   poly6Kernel,
   poly6Lap,
   PADDING,
+  WALL_COLOR,
 } from "./consts";
 import { Particle } from "./particle";
 
 let fluidParticles: Array<Particle> = [];
 let boundaryParticles: Array<Particle> = [];
+let wallParticles: Array<Particle> = [];
 let hashTable: Array<Array<Particle>>;
 
 let max_hi = (HEIGHT + 2 * PADDING) / KERNEL_DISTANCE + 1;
@@ -81,8 +83,8 @@ function sizeCanvas() {
   canvas.height = HEIGHT;
 }
 
-function drawParticle(ctx: CanvasRenderingContext2D, p: Particle) {
-  ctx.fillStyle = WATER_COLOR;
+function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, color: string) {
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(p.pos[0], HEIGHT - p.pos[1], 1, 0, 2 * Math.PI);
   // ctx.stroke();
@@ -126,13 +128,34 @@ function initBoundaries(size: number) {
   });
 }
 
+function initWall(size: number) {
+  const left = 200;
+  const right = 250;
+  const bottom = -50;
+  const top = 200;
+  for (let x = left + size / 2; x < right; x += size) {
+    for (let y = bottom + size / 2; y < top; y += size) {
+      wallParticles.push(new Particle(x, y, 1));
+    }
+  }
+  updateHashTable(wallParticles);
+  computeDensity(wallParticles);
+  wallParticles.forEach((p) => {
+    let volume = 1 / p.density;
+    p.mass = 2 * WATER_DENSITY * volume;
+  });
+}
+
 function render() {
   const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   // Clear the canvas and redraw all fluidParticles
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   fluidParticles.forEach((p) => {
-    drawParticle(ctx, p);
+    drawParticle(ctx, p, WATER_COLOR);
+  });
+  wallParticles.forEach((p) => {
+    drawParticle(ctx, p, WALL_COLOR);
   });
 }
 
@@ -184,6 +207,7 @@ function updateParcitles(particles: Array<Particle>, dt: number) {
     p.update(dt);
   });
 }
+
 function handleBoundaries() {
   fluidParticles.forEach((p) => {
     if (p.pos[0] < 0) {
@@ -202,7 +226,7 @@ function handleBoundaries() {
 }
 
 function simulate() {
-  updateHashTable([...fluidParticles, ...boundaryParticles]);
+  updateHashTable([...fluidParticles, ...boundaryParticles, ...wallParticles]);
   computeDensity(fluidParticles);
   computePressure(fluidParticles);
   computeAcceleration(fluidParticles);
@@ -226,6 +250,7 @@ window.onload = () => {
   // Initialize
   initBoundaries(5);
   initfluidParticles(5);
+  initWall(5);
 
   // Schedule the main animation loop
   animate();

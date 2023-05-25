@@ -10,9 +10,11 @@ export const WATER_COLOR = "#0000ff";
 export const WATER_VISCOSITY = 100;
 
 export const KERNEL_DISTANCE = 10;
-export const TIMESTEP = 1 / 60;
+export const TIMESTEP = 1 / 120;
 export const GRAVITY = glm.vec2.fromValues(0, -98);
 export const RESTITUTION = 0.5;
+
+export const WALL_COLOR = "#ff0000"
 
 const KERNEL_FACTOR = 315 / 64 / Math.PI / KERNEL_DISTANCE ** 9;
 export function poly6Kernel(r: glm.vec2) {
