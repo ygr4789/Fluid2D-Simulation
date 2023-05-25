@@ -201,7 +201,7 @@ window.onload = () => {
   sizeCanvas();
 
   // Initialize
-  initParticles(5);
+  initParticles(4);
 
   // Schedule the main animation loop
   animate();
