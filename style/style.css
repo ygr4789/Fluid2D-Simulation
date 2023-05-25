@@ -4,7 +4,7 @@ body {
   margin: 0;
 }
 #canvas {
-  border: solid 1px black;
+  /* border: solid 1px black; */
   display: block;
 }
 #canvasContainer {
