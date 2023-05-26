@@ -2,7 +2,7 @@ import { vec2 } from "gl-matrix";
 
 export const WIDTH = 600;
 export const HEIGHT = 400;
-export const PADDING = 50;
+export const PADDING = 10;
 
 export const WATER_DENSITY = 998;
 export const WATER_K_FACTOR = 100000;

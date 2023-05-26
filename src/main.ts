@@ -8,7 +8,6 @@ import {
   WIDTH,
   PADDING,
   GRAVITY,
-  TIMESTEP,
   WALL_COLOR,
   WATER_COLOR,
   WATER_DENSITY,
@@ -49,7 +48,7 @@ function render() {
   // Clear the canvas and redraw all fluidParticles
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   fluidParticles.forEach((p) => {
-    drawParticle(ctx, p, 4, WATER_COLOR);
+    drawParticle(ctx, p, 2, WATER_COLOR);
   });
   wallParticles.forEach((p) => {
     drawParticle(ctx, p, 1, WALL_COLOR);
@@ -141,10 +140,11 @@ function initAll() {
   boundaryParticles = [];
   wallParticles = [];
   houseParticles = [];
-  initBoundaries(2);
-  initfluidParticles(KERNEL_DISTANCE);
-  initWall(2);
-  initHouse(2);
+  initBoundaries(1);
+  // initfluidParticles(KERNEL_DISTANCE);
+  initfluidParticles(INITIAL_PARTICLE_DISTANCE);
+  initWall(1);
+  initHouse(1);
 }
 
 // ======================= SOLVE =======================
@@ -222,6 +222,8 @@ function handleBoundaries() {
 
 let WALL_DISTANCE = 200;
 let WALL_HEIGHT = 100;
+let INITIAL_PARTICLE_DISTANCE = 10;
+let TIMESTEP = 0.013;
 document.querySelector("#resetButton")?.addEventListener("click", initAll);
 document.querySelector("#wallDistanceSlider")?.addEventListener("input", (e) => {
   let value = (e.target as HTMLInputElement).value;
@@ -232,6 +234,16 @@ document.querySelector("#wallHeightSlider")?.addEventListener("input", (e) => {
   let value = (e.target as HTMLInputElement).value;
   (document.querySelector("#wallHeightValue") as HTMLParagraphElement).innerHTML = value;
   WALL_HEIGHT = parseInt(value);
+});
+document.querySelector("#resolutionSlider")?.addEventListener("input", (e) => {
+  let value = (e.target as HTMLInputElement).value;
+  (document.querySelector("#resolutionValue") as HTMLParagraphElement).innerHTML = value;
+  INITIAL_PARTICLE_DISTANCE = 10 - parseInt(value);
+});
+document.querySelector("#timeStepSlider")?.addEventListener("input", (e) => {
+  let value = (e.target as HTMLInputElement).value;
+  (document.querySelector("#timeStepValue") as HTMLParagraphElement).innerHTML = value;
+  TIMESTEP = parseFloat(value);
 });
 
 // ======================= MAIN =======================

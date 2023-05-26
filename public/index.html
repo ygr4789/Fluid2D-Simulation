@@ -12,7 +12,7 @@
           <button id="resetButton">reset</button>
         </div>
         <div class="sliderContainer">
-          <input type="range" id="wallDistanceSlider" min="100" max="300" step="10" value="200"/>
+          <input type="range" id="wallDistanceSlider" min="100" max="500" step="10" value="200"/>
           <label for="wallDistanceSlider">Wall Distance : </label>
           <p id="wallDistanceValue">200</p>
         </div>
@@ -20,6 +20,16 @@
           <input type="range" id="wallHeightSlider" min="0" max="400" step="10" value="100"/>
           <label for="wallHeightSlider">Wall Height : </label>
           <p id="wallHeightValue">100</p>
+        </div>
+        <div class="sliderContainer">
+          <input type="range" id="resolutionSlider" min="0" max="5" step="1" value="0"/>
+          <label for="resolutiionSlider">Particle Resolition : </label>
+          <p id="resolutionValue">0</p>
+        </div>
+        <div class="sliderContainer">
+          <input type="range" id="timeStepSlider" min="0.001" max="0.020" step="0.001" value="0.013"/>
+          <label for="timeStepSlider">Timestep : </label>
+          <p id="timeStepValue">0.013</p>
         </div>
       </div>
       <canvas id="canvas"></canvas>
