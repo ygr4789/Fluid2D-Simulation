@@ -8,7 +8,6 @@ import {
   WIDTH,
   GRAVITY,
   KERNEL_DISTANCE,
-  RESTITUTION,
   TIMESTEP,
   WATER_COLOR,
   WATER_DENSITY,
@@ -29,8 +28,6 @@ let hashTable: Array<Array<Particle>>;
 
 let max_hi = (HEIGHT + 2 * PADDING) / KERNEL_DISTANCE + 1;
 let max_wi = (WIDTH + 2 * PADDING) / KERNEL_DISTANCE + 1;
-// let max_hi = (HEIGHT) / KERNEL_DISTANCE + 1;
-// let max_wi = (WIDTH) / KERNEL_DISTANCE + 1;
 
 function updateHashTable(particles: Array<Particle>) {
   hashTable = new Array(max_hi * max_wi);
@@ -38,8 +35,6 @@ function updateHashTable(particles: Array<Particle>) {
     hashTable[i] = new Array();
   }
   particles.forEach((p) => {
-    // let hi = Math.floor(p.pos[1] / KERNEL_DISTANCE);
-    // let wi = Math.floor(p.pos[0] / KERNEL_DISTANCE);
     let hi = Math.floor((p.pos[1] + PADDING) / KERNEL_DISTANCE);
     let wi = Math.floor((p.pos[0] + PADDING) / KERNEL_DISTANCE);
     let cell = hashTable[hi * max_hi + wi];
@@ -77,8 +72,6 @@ function getNearNeighbors(loc: glm.vec2) {
 
 function sizeCanvas() {
   const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
-  // width = window.innerWidth;
-  // height = window.innerHeight;
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
 }
@@ -86,8 +79,7 @@ function sizeCanvas() {
 function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, color: string) {
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.arc(p.pos[0], HEIGHT - p.pos[1], 1, 0, 2 * Math.PI);
-  // ctx.stroke();
+  ctx.arc(p.pos[0], HEIGHT - p.pos[1], 2, 0, 2 * Math.PI);
   ctx.fill();
 }
 
@@ -98,7 +90,9 @@ function initfluidParticles(size: number) {
   const top = 300;
   for (let x = left + size / 2; x < right; x += size) {
     for (let y = bottom + size / 2; y < top; y += size) {
-      fluidParticles.push(new Particle(x + (Math.random() * size) / 10, y + (Math.random() * size) / 10, 1));
+      let noiseX = (Math.random() * size) / 10;
+      let noiseY = (Math.random() * size) / 10;
+      fluidParticles.push(new Particle(x + noiseX, y + noiseY, 1));
     }
   }
   updateHashTable(fluidParticles);
@@ -116,7 +110,7 @@ function initfluidParticles(size: number) {
 function initBoundaries(size: number) {
   for (let x = -PADDING + size / 2; x < WIDTH + PADDING; x += size) {
     for (let y = -PADDING + size / 2; y < HEIGHT + PADDING; y += size) {
-      if (x > 0 && x < WIDTH && y > 0 && y < WIDTH) continue;
+      if (x > 0 && x < WIDTH && y > 0 && y < HEIGHT) continue;
       boundaryParticles.push(new Particle(x, y, 1));
     }
   }
@@ -131,8 +125,8 @@ function initBoundaries(size: number) {
 function initWall(size: number) {
   const left = 200;
   const right = 250;
-  const bottom = -50;
-  const top = 200;
+  const bottom = 0;
+  const top = 100;
   for (let x = left + size / 2; x < right; x += size) {
     for (let y = bottom + size / 2; y < top; y += size) {
       wallParticles.push(new Particle(x, y, 1));
@@ -142,7 +136,7 @@ function initWall(size: number) {
   computeDensity(wallParticles);
   wallParticles.forEach((p) => {
     let volume = 1 / p.density;
-    p.mass = 2 * WATER_DENSITY * volume;
+    p.mass = 1 * WATER_DENSITY * volume;
   });
 }
 
@@ -249,7 +243,7 @@ window.onload = () => {
 
   // Initialize
   initBoundaries(5);
-  initfluidParticles(5);
+  initfluidParticles(10);
   initWall(5);
 
   // Schedule the main animation loop

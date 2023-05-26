@@ -5,16 +5,15 @@ export const HEIGHT = 400;
 export const PADDING = 50;
 
 export const WATER_DENSITY = 998;
-export const WATER_K_FACTOR = 50000;
+export const WATER_K_FACTOR = 500000;
 export const WATER_COLOR = "#0000ff";
 export const WATER_VISCOSITY = 100;
+export const WALL_COLOR = "#ff0000"
 
 export const KERNEL_DISTANCE = 10;
-export const TIMESTEP = 1 / 120;
-export const GRAVITY = glm.vec2.fromValues(0, -98);
-export const RESTITUTION = 0.5;
+export const TIMESTEP = 1 / 60;
+export const GRAVITY = glm.vec2.fromValues(0, -10);
 
-export const WALL_COLOR = "#ff0000"
 
 const KERNEL_FACTOR = 315 / 64 / Math.PI / KERNEL_DISTANCE ** 9;
 export function poly6Kernel(r: glm.vec2) {
