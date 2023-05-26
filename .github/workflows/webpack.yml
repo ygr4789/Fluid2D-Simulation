@@ -42,5 +42,5 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         # environment: 'github-pages'
-        personal_token: ${{ secrets.PERSONAL_TOKEN }}
+        personal_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
