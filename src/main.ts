@@ -17,6 +17,8 @@ import {
   poly6Grad,
   poly6Kernel,
   poly6Lap,
+  KERNEL_DISTANCE,
+  HOUSE_COLOR,
 } from "./consts";
 import { Particle } from "./particle";
 import { hashNearNeighbors, updateHashTable } from "./hashing";
@@ -24,6 +26,7 @@ import { hashNearNeighbors, updateHashTable } from "./hashing";
 let fluidParticles: Array<Particle> = [];
 let boundaryParticles: Array<Particle> = [];
 let wallParticles: Array<Particle> = [];
+let houseParticles: Array<Particle> = [];
 
 // ======================= RENDER =======================
 
@@ -33,10 +36,10 @@ function sizeCanvas() {
   canvas.height = HEIGHT;
 }
 
-function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, color: string) {
+function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, size: number, color: string) {
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.arc(p.pos[0], HEIGHT - p.pos[1], 2, 0, 2 * Math.PI);
+  ctx.arc(p.pos[0], HEIGHT - p.pos[1], size, 0, 2 * Math.PI);
   ctx.fill();
 }
 
@@ -46,10 +49,13 @@ function render() {
   // Clear the canvas and redraw all fluidParticles
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   fluidParticles.forEach((p) => {
-    drawParticle(ctx, p, WATER_COLOR);
+    drawParticle(ctx, p, 4, WATER_COLOR);
   });
   wallParticles.forEach((p) => {
-    drawParticle(ctx, p, WALL_COLOR);
+    drawParticle(ctx, p, 1, WALL_COLOR);
+  });
+  houseParticles.forEach((p) => {
+    drawParticle(ctx, p, 1, HOUSE_COLOR);
   });
 }
 
@@ -96,7 +102,7 @@ function initBoundaries(size: number) {
 
 function initWall(size: number) {
   const left = 200;
-  const right = 250;
+  const right = left + 50;
   const bottom = 0;
   const top = 100;
   for (let x = left + size / 2; x < right; x += size) {
@@ -107,6 +113,24 @@ function initWall(size: number) {
   updateHashTable(wallParticles);
   computeDensity(wallParticles);
   wallParticles.forEach((p) => {
+    let volume = 1 / p.density;
+    p.mass = 1 * WATER_DENSITY * volume;
+  });
+}
+
+function initHouse(size: number) {
+  const left = 550;
+  const right = 600;
+  const bottom = 0;
+  const top = 50;
+  for (let x = left + size / 2; x < right; x += size) {
+    for (let y = bottom + size / 2; y < top; y += size) {
+      houseParticles.push(new Particle(x, y, 1));
+    }
+  }
+  updateHashTable(houseParticles);
+  computeDensity(houseParticles);
+  houseParticles.forEach((p) => {
     let volume = 1 / p.density;
     p.mass = 1 * WATER_DENSITY * volume;
   });
@@ -150,9 +174,9 @@ function computeAcceleration(particles: Array<Particle>) {
       else vec2.scale(acc_p_, acc_p_, ((p_.mass / p_.density) * (p.pressure + p_.pressure)) / 2);
       vec2.add(acc_pressure, acc_pressure, acc_p_);
 
-      if (isBoundary) return;
       vec2.sub(acc_v_, p.vel, p_.vel);
-      vec2.scale(acc_v_, acc_v_, (p_.mass / p_.density) * poly6Lap(r));
+      if (isBoundary) vec2.scale(acc_v_, acc_v_, (p_.mass / p.density) * poly6Lap(r));
+      else vec2.scale(acc_v_, acc_v_, (p_.mass / p_.density) * poly6Lap(r));
       vec2.add(acc_viscosity, acc_viscosity, acc_v_);
     });
     vec2.scaleAndAdd(p.acc, p.acc, acc_pressure, -1 / p.density);
@@ -183,10 +207,14 @@ function handleBoundaries() {
   });
 }
 
+// ======================= GUI =======================
+
+
+
 // ======================= MAIN =======================
 
 function simulate() {
-  updateHashTable([...fluidParticles, ...boundaryParticles, ...wallParticles]);
+  updateHashTable([...fluidParticles, ...boundaryParticles, ...wallParticles, ...houseParticles]);
   computeDensity(fluidParticles);
   computePressure(fluidParticles);
   computeAcceleration(fluidParticles);
@@ -206,9 +234,10 @@ window.onload = () => {
   // Make sure the canvas always fills the whole window
   sizeCanvas();
   // Initialize
-  initBoundaries(5);
-  initfluidParticles(10);
-  initWall(5);
+  initBoundaries(2);
+  initfluidParticles(KERNEL_DISTANCE);
+  initWall(2);
+  initHouse(2);
   // Schedule the main animation loop
   animate();
 };
