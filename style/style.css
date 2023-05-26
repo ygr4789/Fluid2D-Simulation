@@ -3,13 +3,31 @@ body {
   width: 100vw;
   margin: 0;
 }
+p {
+  margin: 0;
+}
+.sliderContainer {
+  gap: 10px;
+  width: 600px;
+  display: flex;
+  align-items: center;
+}
 #canvas {
-  /* border: solid 1px black; */
+  border: solid 1px black;
   display: block;
 }
-#canvasContainer {
+#controller {
+  gap: 5px;
+  width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+}
+#app {
+  gap: 10px;
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }

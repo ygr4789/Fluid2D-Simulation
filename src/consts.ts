@@ -9,7 +9,7 @@ export const WATER_K_FACTOR = 100000;
 export const WATER_COLOR = "#0000ff";
 export const WATER_VISCOSITY = 100;
 export const WALL_COLOR = "#ff0000"
-export const HOUSE_COLOR = "#0000ff"
+export const HOUSE_COLOR = "#00ff00"
 
 export const KERNEL_DISTANCE = 10;
 export const TIMESTEP = 1 / 60;

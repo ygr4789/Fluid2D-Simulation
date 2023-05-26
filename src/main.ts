@@ -101,10 +101,10 @@ function initBoundaries(size: number) {
 }
 
 function initWall(size: number) {
-  const left = 200;
+  const left = WALL_DISTANCE;
   const right = left + 50;
   const bottom = 0;
-  const top = 100;
+  const top = WALL_HEIGHT;
   for (let x = left + size / 2; x < right; x += size) {
     for (let y = bottom + size / 2; y < top; y += size) {
       wallParticles.push(new Particle(x, y, 1));
@@ -134,6 +134,17 @@ function initHouse(size: number) {
     let volume = 1 / p.density;
     p.mass = 1 * WATER_DENSITY * volume;
   });
+}
+
+function initAll() {
+  fluidParticles = [];
+  boundaryParticles = [];
+  wallParticles = [];
+  houseParticles = [];
+  initBoundaries(2);
+  initfluidParticles(KERNEL_DISTANCE);
+  initWall(2);
+  initHouse(2);
 }
 
 // ======================= SOLVE =======================
@@ -207,9 +218,21 @@ function handleBoundaries() {
   });
 }
 
-// ======================= GUI =======================
+// ======================= CONTROLLERS =======================
 
-
+let WALL_DISTANCE = 200;
+let WALL_HEIGHT = 100;
+document.querySelector("#resetButton")?.addEventListener("click", initAll);
+document.querySelector("#wallDistanceSlider")?.addEventListener("input", (e) => {
+  let value = (e.target as HTMLInputElement).value;
+  (document.querySelector("#wallDistanceValue") as HTMLParagraphElement).innerHTML = value;
+  WALL_DISTANCE = parseInt(value);
+});
+document.querySelector("#wallHeightSlider")?.addEventListener("input", (e) => {
+  let value = (e.target as HTMLInputElement).value;
+  (document.querySelector("#wallHeightValue") as HTMLParagraphElement).innerHTML = value;
+  WALL_HEIGHT = parseInt(value);
+});
 
 // ======================= MAIN =======================
 
@@ -234,10 +257,7 @@ window.onload = () => {
   // Make sure the canvas always fills the whole window
   sizeCanvas();
   // Initialize
-  initBoundaries(2);
-  initfluidParticles(KERNEL_DISTANCE);
-  initWall(2);
-  initHouse(2);
+  initAll();
   // Schedule the main animation loop
   animate();
 };
