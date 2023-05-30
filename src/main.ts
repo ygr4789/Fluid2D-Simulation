@@ -181,7 +181,7 @@ function computeAcceleration(particles: Array<Particle>) {
 
       vec2.sub(r, p.pos, p_.pos);
       acc_p_ = poly6Grad(r);
-      if (isBoundary) vec2.scale(acc_p_, acc_p_, (p_.mass / p.density) * p.pressure);
+      if (isBoundary) vec2.scale(acc_p_, acc_p_, (p_.mass / p.density) *  Math.max(p.pressure, 0));
       else vec2.scale(acc_p_, acc_p_, ((p_.mass / p_.density) * (p.pressure + p_.pressure)) / 2);
       vec2.add(acc_pressure, acc_pressure, acc_p_);
 
