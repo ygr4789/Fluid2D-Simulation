@@ -43,6 +43,7 @@ function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, size: number, 
   ctx.fill();
 }
 
+let waterParticleSize = 0;
 function render() {
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   // Clear the canvas and redraw all fluidParticles
@@ -50,7 +51,7 @@ function render() {
   ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   fluidParticles.forEach((p) => {
-    drawParticle(ctx, p, 2, waterColor(p.color));
+    drawParticle(ctx, p, waterParticleSize, waterColor(p.color));
   });
   wallParticles.forEach((p) => {
     drawParticle(ctx, p, 1, WALL_COLOR);
@@ -146,6 +147,7 @@ function initAll() {
   boundaryParticles = [];
   wallParticles = [];
   houseParticles = [];
+  waterParticleSize = INITIAL_PARTICLE_DISTANCE / 3;
   initBoundaries(2);
   initWall(2);
   initHouse(2);
@@ -221,15 +223,19 @@ function handleBoundaries() {
   fluidParticles.forEach((p) => {
     if (p.pos[0] < 0) {
       p.pos[0] = 0;
+      p.vel[0] = 0;
     }
     if (p.pos[0] > WIDTH) {
       p.pos[0] = WIDTH;
+      p.vel[0] = 0;
     }
     if (p.pos[1] < 0) {
       p.pos[1] = 0;
+      p.vel[0] = 0;
     }
     if (p.pos[1] > HEIGHT) {
       p.pos[1] = HEIGHT;
+      p.vel[0] = 0;
     }
   });
 }
@@ -254,7 +260,7 @@ document.querySelector("#wallHeightSlider")?.addEventListener("input", (e) => {
 document.querySelector("#resolutionSlider")?.addEventListener("input", (e) => {
   let value = (e.target as HTMLInputElement).value;
   (document.querySelector("#resolutionValue") as HTMLParagraphElement).innerHTML = value;
-  INITIAL_PARTICLE_DISTANCE = 10 - parseInt(value);
+  INITIAL_PARTICLE_DISTANCE = 10 / (1 + parseInt(value) / 5);
 });
 document.querySelector("#timeStepSlider")?.addEventListener("input", (e) => {
   let value = (e.target as HTMLInputElement).value;
