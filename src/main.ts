@@ -20,16 +20,18 @@ import {
 } from "./consts";
 import { Particle } from "./particle";
 import { hashNearNeighbors, updateHashTable } from "./hashing";
+import { interactionParticle, setInteractoin } from "./interaction";
 
+const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
 let fluidParticles: Array<Particle> = [];
 let boundaryParticles: Array<Particle> = [];
 let wallParticles: Array<Particle> = [];
 let houseParticles: Array<Particle> = [];
+let interactionActive = false;
 
 // ======================= RENDER =======================
 
 function sizeCanvas() {
-  const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
 }
@@ -42,7 +44,6 @@ function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, size: number, 
 }
 
 function render() {
-  const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   // Clear the canvas and redraw all fluidParticles
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -145,9 +146,9 @@ function initAll() {
   boundaryParticles = [];
   wallParticles = [];
   houseParticles = [];
-  initBoundaries(1);
-  initWall(1);
-  initHouse(1);
+  initBoundaries(2);
+  initWall(2);
+  initHouse(2);
   initfluidParticles(INITIAL_PARTICLE_DISTANCE);
 }
 
@@ -263,7 +264,7 @@ document.querySelector("#timeStepSlider")?.addEventListener("input", (e) => {
 // ======================= MAIN =======================
 
 function simulate() {
-  updateHashTable([...fluidParticles, ...boundaryParticles, ...wallParticles, ...houseParticles]);
+  updateHashTable([...fluidParticles, ...boundaryParticles, ...wallParticles, ...houseParticles, interactionParticle]);
   computeProperties(fluidParticles);
   computeAcceleration(fluidParticles);
   updateParcitles(fluidParticles, TIMESTEP);
@@ -284,5 +285,6 @@ window.onload = () => {
   // Initialize
   initAll();
   // Schedule the main animation loop
+  setInteractoin(canvas);
   animate();
 };
