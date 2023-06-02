@@ -172,8 +172,9 @@ function computeProperties(particles: Array<Particle>) {
     p.color = 0;
     hashNearNeighbors(p.pos).forEach((p_) => {
       vec2.sub(r, p.pos, p_.pos);
-      p.density += p_.mass * poly6Kernel(r);
-      p.color += (p_.mass / WATER_DENSITY) * poly6Kernel(r);
+      let kernel = poly6Kernel(r);
+      p.density += p_.mass * kernel;
+      p.color += (p_.mass / WATER_DENSITY) * kernel;
     });
     p.pressure = WATER_GAS_CONSTANT * (p.density - WATER_DENSITY);
   });
