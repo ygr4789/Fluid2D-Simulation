@@ -19,6 +19,9 @@ p {
   border: solid 1px black;
   display: block;
 }
+#canvasContainer {
+  position: relative;
+}
 #controller {
   gap: 5px;
   width: 600px;
