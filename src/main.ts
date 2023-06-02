@@ -1,5 +1,6 @@
 "use strict";
 import { vec2 } from "gl-matrix";
+import * as Stats from "stats.js";
 /** @type {HTMLCanvasElement} */
 
 import "../style/style.css";
@@ -279,19 +280,30 @@ function simulate() {
 }
 
 // Main animation loop
-function animate() {
-  simulate();
-  render();
-  // Schedule the next frame
-  window.requestAnimationFrame(animate);
+function main() {
+  // Initialize
+  initAll();
+  // Interaction
+  setInteractoin(canvas);
+  // Display Stats
+  const stats = new Stats();
+  stats.dom.style.position = 'absolute';
+  document.querySelector("#canvasContainer")!.appendChild(stats.dom);
+  
+  animate();
+  // Schedule the main animation loop
+  function animate() {
+    stats.begin();
+    simulate();
+    render();
+    stats.end();
+    // Schedule the next frame
+    window.requestAnimationFrame(animate);
+  }
 }
 
 window.onload = () => {
   // Make sure the canvas always fills the whole window
   sizeCanvas();
-  // Initialize
-  initAll();
-  // Schedule the main animation loop
-  setInteractoin(canvas);
-  animate();
+  main();
 };
