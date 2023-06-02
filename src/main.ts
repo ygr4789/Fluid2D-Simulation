@@ -9,15 +9,14 @@ import {
   PADDING,
   GRAVITY,
   WALL_COLOR,
-  WATER_COLOR,
   WATER_DENSITY,
-  WATER_K_FACTOR,
+  WATER_GAS_CONSTANT,
   WATER_VISCOSITY,
   poly6Grad,
   poly6Kernel,
   poly6Lap,
-  KERNEL_DISTANCE,
   HOUSE_COLOR,
+  waterColor,
 } from "./consts";
 import { Particle } from "./particle";
 import { hashNearNeighbors, updateHashTable } from "./hashing";
@@ -47,8 +46,10 @@ function render() {
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   // Clear the canvas and redraw all fluidParticles
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   fluidParticles.forEach((p) => {
-    drawParticle(ctx, p, 2, WATER_COLOR);
+    drawParticle(ctx, p, 2, waterColor(p.color));
   });
   wallParticles.forEach((p) => {
     drawParticle(ctx, p, 1, WALL_COLOR);
@@ -82,6 +83,7 @@ function initfluidParticles(size: number) {
   fluidParticles.forEach((p) => {
     p.mass = WATER_PARTICLE_MASS;
   });
+  computeProperties(fluidParticles);
 }
 
 function initBoundaries(size: number) {
@@ -97,6 +99,7 @@ function initBoundaries(size: number) {
     let volume = 1 / p.density;
     p.mass = WATER_DENSITY * volume;
   });
+  computeDensity(boundaryParticles);
 }
 
 function initWall(size: number) {
@@ -115,6 +118,7 @@ function initWall(size: number) {
     let volume = 1 / p.density;
     p.mass = 1 * WATER_DENSITY * volume;
   });
+  computeDensity(wallParticles);
 }
 
 function initHouse(size: number) {
@@ -133,6 +137,7 @@ function initHouse(size: number) {
     let volume = 1 / p.density;
     p.mass = 1 * WATER_DENSITY * volume;
   });
+  computeDensity(houseParticles);
 }
 
 function initAll() {
@@ -141,10 +146,9 @@ function initAll() {
   wallParticles = [];
   houseParticles = [];
   initBoundaries(1);
-  // initfluidParticles(KERNEL_DISTANCE);
-  initfluidParticles(INITIAL_PARTICLE_DISTANCE);
   initWall(1);
   initHouse(1);
+  initfluidParticles(INITIAL_PARTICLE_DISTANCE);
 }
 
 // ======================= SOLVE =======================
@@ -160,9 +164,17 @@ function computeDensity(particles: Array<Particle>) {
   });
 }
 
-function computePressure(particles: Array<Particle>) {
+function computeProperties(particles: Array<Particle>) {
+  let r = vec2.create();
   particles.forEach((p) => {
-    p.pressure = WATER_K_FACTOR * (p.density - WATER_DENSITY);
+    p.density = 0;
+    p.color = 0;
+    hashNearNeighbors(p.pos).forEach((p_) => {
+      vec2.sub(r, p.pos, p_.pos);
+      p.density += p_.mass * poly6Kernel(r);
+      p.color += (p_.mass / WATER_DENSITY) * poly6Kernel(r);
+    });
+    p.pressure = WATER_GAS_CONSTANT * (p.density - WATER_DENSITY);
   });
 }
 
@@ -179,12 +191,14 @@ function computeAcceleration(particles: Array<Particle>) {
     hashNearNeighbors(p.pos).forEach((p_) => {
       let isBoundary = p_.pressure === undefined;
 
+      // Pressure
       vec2.sub(r, p.pos, p_.pos);
       acc_p_ = poly6Grad(r);
-      if (isBoundary) vec2.scale(acc_p_, acc_p_, (p_.mass / p.density) *  Math.max(p.pressure, 0));
+      if (isBoundary) vec2.scale(acc_p_, acc_p_, (p_.mass / p.density) * Math.max(p.pressure, 0));
       else vec2.scale(acc_p_, acc_p_, ((p_.mass / p_.density) * (p.pressure + p_.pressure)) / 2);
       vec2.add(acc_pressure, acc_pressure, acc_p_);
 
+      // Viscosity
       vec2.sub(acc_v_, p.vel, p_.vel);
       if (isBoundary) vec2.scale(acc_v_, acc_v_, (p_.mass / p.density) * poly6Lap(r));
       else vec2.scale(acc_v_, acc_v_, (p_.mass / p_.density) * poly6Lap(r));
@@ -250,8 +264,7 @@ document.querySelector("#timeStepSlider")?.addEventListener("input", (e) => {
 
 function simulate() {
   updateHashTable([...fluidParticles, ...boundaryParticles, ...wallParticles, ...houseParticles]);
-  computeDensity(fluidParticles);
-  computePressure(fluidParticles);
+  computeProperties(fluidParticles);
   computeAcceleration(fluidParticles);
   updateParcitles(fluidParticles, TIMESTEP);
   handleBoundaries();

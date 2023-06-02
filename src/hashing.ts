@@ -24,8 +24,6 @@ const dw = [-1, 0, 1, -1, 0, 1, -1, 0, 1];
 
 export function hashNearNeighbors(loc: vec2) {
   let ret: Array<Particle> = [];
-  // let hi = Math.floor(loc[1] / KERNEL_DISTANCE);
-  // let wi = Math.floor(loc[0] / KERNEL_DISTANCE);
   let hi = Math.floor((loc[1] + PADDING) / KERNEL_DISTANCE);
   let wi = Math.floor((loc[0] + PADDING) / KERNEL_DISTANCE);
   for (let i = 0; i < 9; i++) {

@@ -6,7 +6,9 @@ export class Particle {
   acc: glm.vec2;
   pressure: number;
   density: number;
+  color: number;
   mass: number;
+  NN: Array<Particle> = [];
   constructor(x: number, y: number, mass: number) {
     this.pos = glm.vec2.fromValues(x, y);
     this.vel = glm.vec2.create();
