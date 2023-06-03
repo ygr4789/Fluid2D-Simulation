@@ -15,7 +15,7 @@ export const TIMESTEP = 1 / 60;
 export const GRAVITY = vec2.fromValues(0, -100);
 
 export const KERNEL_DISTANCE = 10;
-const SQR_KERNEL_DISTANCE = KERNEL_DISTANCE ** 2;
+export const SQR_KERNEL_DISTANCE = KERNEL_DISTANCE ** 2;
 
 export function waterColor(color: number) {
   let t = (color - 1) / 0.1;

@@ -20,15 +20,14 @@ import {
   waterColor,
 } from "./consts";
 import { Particle } from "./particle";
-import { hashNearNeighbors, updateHashTable } from "./hashing";
 import { interactionParticle, setInteractoin } from "./interaction";
+import { bindHashTable, hashNearNeighbors, updateHashTable } from "./hashing";
 
 const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
 let fluidParticles: Array<Particle> = [];
 let boundaryParticles: Array<Particle> = [];
 let wallParticles: Array<Particle> = [];
 let houseParticles: Array<Particle> = [];
-let interactionActive = false;
 
 // ======================= RENDER =======================
 
@@ -76,7 +75,8 @@ function initfluidParticles(size: number) {
       fluidParticles.push(new Particle(x + noiseX, y + noiseY, 1));
     }
   }
-  updateHashTable(fluidParticles);
+  bindHashTable(fluidParticles);
+  updateHashTable();
   computeDensity(fluidParticles);
   let max_density = 0;
   fluidParticles.forEach((p) => {
@@ -96,7 +96,8 @@ function initBoundaries(size: number) {
       boundaryParticles.push(new Particle(x, y, 1));
     }
   }
-  updateHashTable(boundaryParticles);
+  bindHashTable(boundaryParticles);
+  updateHashTable();
   computeDensity(boundaryParticles);
   boundaryParticles.forEach((p) => {
     let volume = 1 / p.density;
@@ -115,7 +116,8 @@ function initWall(size: number) {
       wallParticles.push(new Particle(x, y, 1));
     }
   }
-  updateHashTable(wallParticles);
+  bindHashTable(wallParticles);
+  updateHashTable();
   computeDensity(wallParticles);
   wallParticles.forEach((p) => {
     let volume = 1 / p.density;
@@ -134,7 +136,8 @@ function initHouse(size: number) {
       houseParticles.push(new Particle(x, y, 1));
     }
   }
-  updateHashTable(houseParticles);
+  bindHashTable(houseParticles);
+  updateHashTable();
   computeDensity(houseParticles);
   houseParticles.forEach((p) => {
     let volume = 1 / p.density;
@@ -153,6 +156,7 @@ function initAll() {
   initWall(2);
   initHouse(2);
   initfluidParticles(INITIAL_PARTICLE_DISTANCE);
+  bindHashTable([...fluidParticles, ...boundaryParticles, ...wallParticles, ...houseParticles, interactionParticle]);
 }
 
 // ======================= SOLVE =======================
@@ -272,7 +276,7 @@ document.querySelector("#timeStepSlider")?.addEventListener("input", (e) => {
 // ======================= MAIN =======================
 
 function simulate() {
-  updateHashTable([...fluidParticles, ...boundaryParticles, ...wallParticles, ...houseParticles, interactionParticle]);
+  updateHashTable();
   computeProperties(fluidParticles);
   computeAcceleration(fluidParticles);
   updateParcitles(fluidParticles, TIMESTEP);
